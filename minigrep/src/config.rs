@@ -1,4 +1,4 @@
-use std::env;
+use std::env::{self, Args};
 
 pub struct Config {
     pub query: String,
@@ -7,13 +7,23 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &[String]) -> Result<Config, &'static str> {
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+    pub fn new(mut args: Args) -> Result<Config, &'static str> {
+        // First argument is the program name, ignore it here 
+        args.next();
+
+        let query = match args.next() {
+            Some(value) => value,
+            None => return Err("missing query")
+        };
+
+        let filename = match args.next() {
+            Some(value) => value,
+            None => return Err("missing filename")
+        };
+
         Ok(Config {
-            query: args[1].clone(),
-            filename: args[2].clone(),
+            query,
+            filename,
             case_sensitive: env::var("CASE_INSENSITIVE").is_err(),
         })
     }
